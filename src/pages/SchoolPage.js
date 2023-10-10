@@ -20,13 +20,16 @@ import AddingSchool from '../sections/@dashboard/maktab/addingSchool';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import { token } from '../sections/@dashboard/user/addingUsers';
+import LoaderPage from './Loader';
 
 const SchoolPage = () => {
   const [open, setOpen] = useState(false);
 
   const [user, setUser] = useState([]);
+  const [loader, setLoader] = useState(false);
 
   const getMaktab = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/maktablar/get-all-maktab', {
       method: 'GET',
       headers: {
@@ -45,7 +48,8 @@ const SchoolPage = () => {
       })
       // eslint-disable-next-line react-hooks/rules-of-hooks
       .then((data) => setUser(data.data))
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteMaktab = (id) => {
@@ -89,25 +93,35 @@ const SchoolPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {user.map((row) => (
-                  <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row?.user?.name}
-                    </TableCell>
-                    <TableCell>{row.nomi}</TableCell>
-                    <TableCell>{row.sinf}</TableCell>
-                    <TableCell>{row.oquvchi}</TableCell>
-                    <TableCell>{row.jinsi}</TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => deleteMaktab(row._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  user.map((row) => (
+                    <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {row?.user?.name}
+                      </TableCell>
+                      <TableCell>{row.nomi}</TableCell>
+                      <TableCell>{row.sinf}</TableCell>
+                      <TableCell>{row.oquvchi}</TableCell>
+                      <TableCell>{row.jinsi}</TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
+                          Edit
+                        </Button>
+                        <Button variant="contained" color="error" onClick={() => deleteMaktab(row._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

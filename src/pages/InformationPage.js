@@ -14,13 +14,16 @@ import {
 import React, { useEffect, useState } from 'react';
 import { AddingInformation } from '../sections/@dashboard/malumot';
 import Iconify from '../components/iconify';
+import LoaderPage from './Loader';
 
 function DisplayingInformation() {
   const [user, setUser] = useState([]);
   const [open, setOpen] = useState(false);
   const token = localStorage.getItem('token');
+  const [loader, setLoader] = useState(false);
 
   const getMalumotlar = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/malumotlar/get-all-malumotlar', {
       method: 'GET',
       headers: {
@@ -31,7 +34,8 @@ function DisplayingInformation() {
       .then((data) => {
         setUser(data.data);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteMalumot = (id) => {
@@ -80,46 +84,56 @@ function DisplayingInformation() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {user.map((row) => (
-                <TableRow key={row._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell component="th" scope="row">
-                    {row?.user?.name}
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    {row.tugilganYili.slice(0, 10)}
-                  </TableCell>
-                  <TableCell>{row.jinsi}</TableCell>
-                  <TableCell>{row.malumoti}</TableCell>
-                  <TableCell>{row.mutaxasisligi}</TableCell>
-                  <TableCell>{row.unvoni}</TableCell>
-                  <TableCell>{row.ishBoshlagan.slice(0, 10)}</TableCell>
-                  <TableCell>
-                    <Link
-                      target="_blank"
-                      href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.boshqarmadan?.name}`}
-                    >
-                      {`${row?.boshqarmadan?.name?.slice(0, 10)}...`}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      target="_blank"
-                      href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.ketganMalumot?.name}`}
-                    >
-                      {`${row?.ketganMalumot?.name?.slice(0, 10)}...`}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{row.kelganYili.slice(0, 10)}</TableCell>
-                  <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
-                      Edit
-                    </Button>
-                    <Button variant="contained" color="error" onClick={() => deleteMalumot(row._id)}>
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {loader ? (
+                <>
+                  <TableRow>
+                    <TableCell colSpan={11}>
+                      <LoaderPage />
+                    </TableCell>
+                  </TableRow>
+                </>
+              ) : (
+                user.map((row) => (
+                  <TableRow key={row._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row">
+                      {row?.user?.name}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {row.tugilganYili.slice(0, 10)}
+                    </TableCell>
+                    <TableCell>{row.jinsi}</TableCell>
+                    <TableCell>{row.malumoti}</TableCell>
+                    <TableCell>{row.mutaxasisligi}</TableCell>
+                    <TableCell>{row.unvoni}</TableCell>
+                    <TableCell>{row.ishBoshlagan.slice(0, 10)}</TableCell>
+                    <TableCell>
+                      <Link
+                        target="_blank"
+                        href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.boshqarmadan?.name}`}
+                      >
+                        {`${row?.boshqarmadan?.name?.slice(0, 10)}...`}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        target="_blank"
+                        href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.ketganMalumot?.name}`}
+                      >
+                        {`${row?.ketganMalumot?.name?.slice(0, 10)}...`}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{row.kelganYili.slice(0, 10)}</TableCell>
+                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
+                        Edit
+                      </Button>
+                      <Button variant="contained" color="error" onClick={() => deleteMalumot(row._id)}>
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

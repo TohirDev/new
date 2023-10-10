@@ -37,6 +37,8 @@ function AddingUsers({ onCloses, onOpen, onRefetch }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const createUser = (sendUser) => {
+    if (sendUser.tuman?.length <= 0) delete sendUser.tuman;
+    if (sendUser.viloyat?.length <= 0) delete sendUser.viloyat;
     fetch('https://iiv-backend-fdji.onrender.com/api/users/register', {
       method: 'POST',
       headers: {
@@ -177,7 +179,7 @@ function AddingUsers({ onCloses, onOpen, onRefetch }) {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 label="Viloyatlar"
-                {...register('viloyat', { required: true })}
+                {...register('viloyat')}
               >
                 {viloyat?.map((region) => (
                   <MenuItem onClick={() => getTumanByViloyatId(region?._id)} key={region._id} value={region._id}>
@@ -199,7 +201,7 @@ function AddingUsers({ onCloses, onOpen, onRefetch }) {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 label="Tumanlar"
-                {...register('tuman', { required: true })}
+                {...register('tuman')}
               >
                 {tuman?.map((region) => (
                   <MenuItem key={region._id} value={region._id}>

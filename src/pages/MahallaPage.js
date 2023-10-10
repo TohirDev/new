@@ -18,12 +18,15 @@ import { token } from '../sections/@dashboard/user/addingUsers';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import AddingMahalla from '../sections/@dashboard/mahalla/addingMahalla';
+import LoaderPage from './Loader';
 
 const MahallaPage = () => {
   const [open, setOpen] = useState(false);
 
   const [user, setUser] = useState([]);
+  const [loader, setLoader] = useState(false);
   const getMahalla = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/mahallalar/get-all-mahalla', {
       method: 'GET',
       headers: {
@@ -41,7 +44,8 @@ const MahallaPage = () => {
         throw new Error('Response in not JSON');
       })
       .then((data) => setUser(data.data))
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteMahalla = (id) => {
@@ -82,22 +86,32 @@ const MahallaPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {user.map((row) => (
-                  <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row?.user?.name}
-                    </TableCell>
-                    <TableCell>{row.nomi}</TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="contained" color="inherit" sx={{ mr: 2 }}>
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => deleteMahalla(row._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={3}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  user.map((row) => (
+                    <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {row?.user?.name}
+                      </TableCell>
+                      <TableCell>{row.nomi}</TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="contained" color="inherit" sx={{ mr: 2 }}>
+                          Edit
+                        </Button>
+                        <Button variant="contained" color="error" onClick={() => deleteMahalla(row._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

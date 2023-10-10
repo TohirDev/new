@@ -19,12 +19,15 @@ import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import { token } from '../sections/@dashboard/user/addingUsers';
 import AddingMurojat from '../sections/@dashboard/murojatlar/addingMurojat';
+import LoaderPage from './Loader';
 
 const MurojatlarPage = () => {
   const [open, setOpen] = useState(false);
 
   const [user, setUser] = useState([]);
+  const [loader, setLoader] = useState(false);
   const getMurojat = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/murojatlar/get-all-murojatlar', {
       method: 'GET',
       headers: {
@@ -44,7 +47,8 @@ const MurojatlarPage = () => {
       .then((data) => {
         setUser(data?.data);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteMurojat = (id) => {
@@ -87,28 +91,38 @@ const MurojatlarPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {user?.map((row) => (
-                  <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row?.user?.name}
-                    </TableCell>
-                    <TableCell>{row?.nomi}</TableCell>
-                    <TableCell>{row?.manzili}</TableCell>
-                    <TableCell>
-                      <Link target="_blank" href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.pdf?.name}`}>
-                        {row?.pdf?.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="contained" color="inherit" sx={{ mr: 2 }}>
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => deleteMurojat(row?._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  user?.map((row) => (
+                    <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {row?.user?.name}
+                      </TableCell>
+                      <TableCell>{row?.nomi}</TableCell>
+                      <TableCell>{row?.manzili}</TableCell>
+                      <TableCell>
+                        <Link target="_blank" href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.pdf?.name}`}>
+                          {row?.pdf?.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="contained" color="inherit" sx={{ mr: 2 }}>
+                          Edit
+                        </Button>
+                        <Button variant="contained" color="error" onClick={() => deleteMurojat(row?._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

@@ -21,13 +21,16 @@ import Iconify from '../components/iconify';
 // import PDF from '../../public/assets/icons/ic_flag_de.svg';
 import AddingQilinganIshlar from '../sections/@dashboard/qilinganIshlar/addingQilinganIshlar';
 import { token } from '../sections/@dashboard/user/addingUsers';
+import LoaderPage from './Loader';
 // import {} from '../../../../../../MVD-backend/server/uploads'
 function QilinganIshlarPage() {
   const [open, setOpen] = useState(false);
+  const [loader, setLoader] = useState(false);
   const [ishlarData, setIshlarData] = useState([]);
   // const { register, handleSubmit } = useForm();
 
   const getIshlar = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/ishlar/get-all-ish', {
       method: 'GET',
       headers: {
@@ -45,7 +48,8 @@ function QilinganIshlarPage() {
         throw new Error('Response in not JSON');
       })
       .then((data) => setIshlarData(data?.data))
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteIshById = (id) => {
@@ -89,27 +93,37 @@ function QilinganIshlarPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {ishlarData.map((ish) => (
-                  // eslint-disable-next-line react/jsx-key
-                  <TableRow key={ish?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {ish?.user?.name}
-                    </TableCell>
-                    <TableCell>{ish?.modda}</TableCell>
-                    <TableCell>{ish?.soni}</TableCell>
-                    <TableCell>
-                      <Link target="_blank" href={`https://iiv-backend-fdji.onrender.com/uploads/${ish?.file?.name}`}>
-                        {ish?.file?.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{ish?.createdAt?.slice(0, 10)}</TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="contained" color="error" onClick={() => deleteIshById(ish?._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  ishlarData.map((ish) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <TableRow key={ish?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {ish?.user?.name}
+                      </TableCell>
+                      <TableCell>{ish?.modda}</TableCell>
+                      <TableCell>{ish?.soni}</TableCell>
+                      <TableCell>
+                        <Link target="_blank" href={`https://iiv-backend-fdji.onrender.com/uploads/${ish?.file?.name}`}>
+                          {ish?.file?.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{ish?.createdAt?.slice(0, 10)}</TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="contained" color="error" onClick={() => deleteIshById(ish?._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

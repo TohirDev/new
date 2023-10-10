@@ -21,12 +21,16 @@ import { token } from '../sections/@dashboard/user/addingUsers';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import AddingVacation from '../sections/@dashboard/tatil_varaqa/addingVacation';
+import LoaderPage from './Loader';
 
 function VacationPage() {
   const [open, setOpen] = useState(false);
 
   const [user, setUser] = useState([]);
+  const [loader, setLoader] = useState(false);
+
   const getVaraqa = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/varaqalar/get-all-varaqa', {
       method: 'GET',
       headers: {
@@ -47,7 +51,8 @@ function VacationPage() {
         setUser(data.data);
         // console.log(data.data);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoader(false));
   };
 
   const deleteVaraqa = (id) => {
@@ -89,37 +94,47 @@ function VacationPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {user?.map((row) => (
-                  <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row?.user?.name}
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        target="_blank"
-                        href={`https://iiv-backend-4ila.onrender.comuploads/${row?.tatilVaraqa?.name}`}
-                      >
-                        {row?.tatilVaraqa?.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link
-                        target="_blank"
-                        href={`https://iiv-backend-4ila.onrender.comuploads/${row?.malumotNoma?.name}`}
-                      >
-                        {row?.malumotNoma?.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => deleteVaraqa(row._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  user?.map((row) => (
+                    <TableRow key={row?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {row?.user?.name}
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          target="_blank"
+                          href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.tatilVaraqa?.name}`}
+                        >
+                          {row?.tatilVaraqa?.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          target="_blank"
+                          href={`https://iiv-backend-fdji.onrender.com/uploads/${row?.malumotNoma?.name}`}
+                        >
+                          {row?.malumotNoma?.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button variant="contained" color="inherit" sx={{ mr: 2 }} onClick={() => console.log(row.id)}>
+                          Edit
+                        </Button>
+                        <Button variant="contained" color="error" onClick={() => deleteVaraqa(row._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

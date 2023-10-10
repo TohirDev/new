@@ -22,6 +22,7 @@ import {
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import { AddingUsers } from 'src/sections/@dashboard/user';
+import LoaderPage from './Loader';
 
 export default function UserPage() {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,9 @@ export default function UserPage() {
 
   const [user, setUser] = useState([]);
   const token = localStorage.getItem('token');
+  let [loader, setLoader] = useState(false);
   const getUsers = () => {
+    setLoader(true);
     fetch('https://iiv-backend-fdji.onrender.com/api/users/get-all-user-info', {
       method: 'GET',
       headers: {
@@ -51,12 +54,14 @@ export default function UserPage() {
       })
       .then((data) => {
         setUser(data.data);
+
         // console.log(data.data);
       })
       .catch((error) => {
         console.log(error);
         // localStorage.removeItem('token');
-      });
+      })
+      .finally(() => setLoader(false));
   };
 
   const deleteUser = (id) => {
@@ -85,9 +90,6 @@ export default function UserPage() {
             Yangi Foydalanuvchi Qo'shish
           </Button>
         </Stack>
-
-        {/* <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} /> */}
-
         <Scrollbar>
           <AddingUsers onOpen={open} onCloses={() => setOpen(false)} onRefetch={() => getUsers()} />
           <TableContainer component={Paper}>
@@ -103,46 +105,56 @@ export default function UserPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {user.map((row) => (
-                  <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row.name}
-                    </TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>
-                      {(() => {
-                        switch (row.roles[0]) {
-                          case 'res':
-                            return 'Admin';
-                          case 'vil':
-                            return 'Viloyat admin';
-                          case 'tum':
-                            return 'Tuman admin';
-                          default:
-                            return 'Psixolog';
-                        }
-                      })()}
-                    </TableCell>
-                    <TableCell>{row?.viloyat?.nomi}</TableCell>
+                {loader ? (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <LoaderPage />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  user.map((row) => (
+                    <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">
+                        {row.name}
+                      </TableCell>
+                      <TableCell>{row.email}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          switch (row.roles[0]) {
+                            case 'res':
+                              return 'Admin';
+                            case 'vil':
+                              return 'Viloyat admin';
+                            case 'tum':
+                              return 'Tuman admin';
+                            default:
+                              return 'Psixolog';
+                          }
+                        })()}
+                      </TableCell>
+                      <TableCell>{row?.viloyat?.nomi}</TableCell>
 
-                    <TableCell>{row?.tuman?.nomi}</TableCell>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button
-                        variant="contained"
-                        color="inherit"
-                        sx={{ mr: 2 }}
-                        onClick={() => {
-                          setOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => deleteUser(row._id)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <TableCell>{row?.tuman?.nomi}</TableCell>
+                      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="inherit"
+                          sx={{ mr: 2 }}
+                          onClick={() => {
+                            setOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button variant="contained" color="error" onClick={() => deleteUser(row._id)}>
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>

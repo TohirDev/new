@@ -757,7 +757,7 @@ export default function DashboardAppPage() {
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Viloyatlar" total={12} color="info" icon={'tdesign:data'} />
+            <AppWidgetSummary title="Viloyatlar" total={14} color="info" icon={'tdesign:data'} />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
@@ -769,7 +769,7 @@ export default function DashboardAppPage() {
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
-            <AppWidgetSummary title="Maktablar" total={1230} color="info" icon={'fluent:data-area-20-filled'} />
+            <AppWidgetSummary title="Maktablar" total={600} color="info" icon={'fluent:data-area-20-filled'} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={8} key={1}>
@@ -838,9 +838,9 @@ export default function DashboardAppPage() {
             <AppCurrentVisits
               title="Maktablar"
               chartData={[
-                { label: "Vilayat bo'yicha maktablar", value: 10344 },
-                { label: 'Erkak', value: 4435 },
-                { label: 'Ayol', value: 2443 },
+                { label: "Vilayat bo'yicha maktablar", value: 600 },
+                { label: 'Erkak', value: 430 },
+                { label: 'Ayol', value: 170 },
               ]}
               chartColors={[
                 theme.palette.primary.main,

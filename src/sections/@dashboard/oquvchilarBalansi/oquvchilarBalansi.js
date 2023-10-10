@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -13,11 +14,13 @@ import {
 import React, { useEffect, useState } from 'react';
 import { token } from '../user/addingUsers';
 import { AppCurrentVisits } from '../app';
+import LoaderPage from '../../../pages/Loader';
+import FILE from './excel.xlsx';
 
 function OquvchilarBalansi() {
   const [viloyat, setViloyat] = useState([]);
   const [tuman, setTuman] = useState([]);
-  const isTrue = true;
+  const [loader, setLoader] = useState(false);
   const theme = useTheme();
   const maktabData = [
     {
@@ -115,14 +118,29 @@ function OquvchilarBalansi() {
 
   return (
     <Card>
-      <CardHeader title="O'quvchilar balansi" />
+      <CardHeader
+        title="O'quvchilar balansi"
+        action={
+          <Button target="_blank" href={FILE} variant="contained">
+            Export
+          </Button>
+        }
+      />
       <CardContent>
         <Grid container spacing={3}>
           <Grid item sm={6}>
             <Box style={sameStyle} sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Viloyatlar</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Viloyatlar">
+                <Select
+                  onChange={() => {
+                    setLoader(true);
+                    setTimeout(() => setLoader(false), 2000);
+                  }}
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Viloyatlar"
+                >
                   {viloyat?.map((region) => (
                     <MenuItem onClick={() => getTumanByViloyatId(region?._id)} key={region._id} value={region._id}>
                       {region.nomi}
@@ -136,7 +154,15 @@ function OquvchilarBalansi() {
             <Box style={sameStyle} sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Tumanlar</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Tumanlar">
+                <Select
+                  onChange={() => {
+                    setLoader(true);
+                    setTimeout(() => setLoader(false), 2000);
+                  }}
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Tumanlar"
+                >
                   {tuman?.map((region) => (
                     <MenuItem key={region._id} value={region._id}>
                       {region.nomi}
@@ -150,7 +176,15 @@ function OquvchilarBalansi() {
             <Box style={sameStyle} sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Maktablar</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Maktablar">
+                <Select
+                  onChange={() => {
+                    setLoader(true);
+                    setTimeout(() => setLoader(false), 2000);
+                  }}
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Maktablar"
+                >
                   {maktabData?.map((maktab) => (
                     <MenuItem key={maktab.id} value={maktab.id}>
                       {maktab.maktab}
@@ -164,7 +198,15 @@ function OquvchilarBalansi() {
             <Box style={sameStyle} sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Sinflar</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Sinflar">
+                <Select
+                  onChange={() => {
+                    setLoader(true);
+                    setTimeout(() => setLoader(false), 2000);
+                  }}
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Sinflar"
+                >
                   {sinflar?.map((maktab) => (
                     <MenuItem key={maktab.id} value={maktab.id}>
                       {maktab.maktab}
@@ -174,7 +216,13 @@ function OquvchilarBalansi() {
               </FormControl>
             </Box>
           </Grid>
-          {isTrue && (
+          {loader ? (
+            <>
+              <Grid item sm={12}>
+                <LoaderPage />
+              </Grid>
+            </>
+          ) : (
             <Grid container spacing={3} sx={{ ml: 1, mt: 1 }}>
               <Grid item xs={12} md={6} lg={4}>
                 <AppCurrentVisits
