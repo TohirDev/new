@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 //
@@ -34,19 +34,6 @@ const Main = styled('div')(({ theme }) => ({
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      navigate('/login');
-    } else {
-      setTimeout(() => {
-        localStorage.removeItem('token');
-        console.log('hhh');
-        window.location.reload();
-      }, 43 * 1000000);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <StyledRoot>

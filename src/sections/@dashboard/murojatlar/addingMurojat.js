@@ -12,20 +12,24 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { PropTypes } from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { token } from '../user/addingUsers';
+import useGetAllUsers from '../../../hooks/useFetch';
 
 function AddingMurojat({ onCloses, onOpen, onRequest }) {
   const sameStyle = {
     margin: '10px 0',
   };
 
-  const [usersData, setUsersData] = useState([]);
+  // const [usersData, setUsersData] = useState([]);
   const [murojatIdPdf, setMurojatIdPdf] = useState('');
-
-  const { register, handleSubmit, reset } = useForm();
+  const [pdfIsloading, setPdfIsLoading] = useState(false);
+  const [fetchData, setFetchData] = useState(false);
+  const { register, handleSubmit, reset } = useForm({
+    user: '',
+  });
 
   const createMurojat = (murojat) => {
     fetch('https://iiv-backend-fdji.onrender.com/api/murojatlar/add', {
@@ -46,21 +50,36 @@ function AddingMurojat({ onCloses, onOpen, onRequest }) {
       });
     });
   };
-  useEffect(() => {
-    fetch('https://iiv-backend-fdji.onrender.com/api/users/get-all-user-info', {
-      method: 'GET',
-      headers: {
-        Authorization: token,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        setUsersData(result.data);
-      });
-  }, []);
+  console.log('working');
+
+  // const getAllUsers = useCallback(async () => {
+  //   try {
+  //     if (usersData.length === 0) {
+  //       const response = await fetch('https://iiv-backend-fdji.onrender.com/api/users/get-all-user-info', {
+  //         method: 'GET',
+  //         headers: {
+  //           Authorization: token,
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
+  //       const result = await response.json();
+  //       if (response.ok) setUsersData(result.data);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }, [usersData]);
+
+  const { data, laoding, getAllUsers } = useGetAllUsers(
+    'https://iiv-backend-fdji.onrender.com/api/users/get-all-user-info'
+  );
+
+  // const getAllUsers = () => {
+  //   setFetchData(true);
+  // };
 
   const sendMurojatPdf = (data) => {
+    setPdfIsLoading(true);
     const formData = new FormData();
     formData.append('pdf', data?.target?.files[0]);
     fetch('https://iiv-backend-fdji.onrender.com/api/pdflar/upload', {
@@ -71,8 +90,12 @@ function AddingMurojat({ onCloses, onOpen, onRequest }) {
       body: formData,
     })
       .then((res) => res.json())
-      .then((result) => setMurojatIdPdf(result?.data?._id))
-      .catch((err) => console.log(err));
+      .then((result) => {
+        console.log('pdf id', result?.data?._id);
+        setMurojatIdPdf(result?.data?._id);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setPdfIsLoading(false));
   };
 
   return (
@@ -81,7 +104,6 @@ function AddingMurojat({ onCloses, onOpen, onRequest }) {
       <form
         onSubmit={handleSubmit((data) => {
           createMurojat({ ...data, pdf: murojatIdPdf });
-          console.log({ ...data, pdf: murojatIdPdf });
         })}
       >
         <DialogContent>
@@ -93,10 +115,12 @@ function AddingMurojat({ onCloses, onOpen, onRequest }) {
                 id="demo-simple-select"
                 label="Foydalanuvchilar"
                 {...register('user', { required: true })}
+                onOpen={getAllUsers}
               >
-                {usersData.map((user) => (
+                {data?.data.map((user) => (
                   <MenuItem key={user._id} value={user._id}>
                     {user.name}
+                    <p>Loading...</p>
                   </MenuItem>
                 ))}
               </Select>
@@ -123,8 +147,8 @@ function AddingMurojat({ onCloses, onOpen, onRequest }) {
           >
             Yopish
           </Button>
-          <Button variant="contained" color="info" type="submit">
-            Qo'shish
+          <Button variant="contained" color="info" type="submit" disabled={!murojatIdPdf}>
+            {pdfIsloading ? 'Loading...' : "Qo'shish"}
           </Button>
         </DialogActions>
       </form>

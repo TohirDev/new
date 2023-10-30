@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 // @mui
 import {
   Card,
@@ -19,10 +19,11 @@ import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 import AddingMahalla from '../sections/@dashboard/mahalla/addingMahalla';
 import LoaderPage from './Loader';
+import { useMahallaStore } from '../store/mahalla';
 
 const MahallaPage = () => {
   const [open, setOpen] = useState(false);
-
+  const [setMahallaModal] = useMahallaStore((state) => [state.setMahallaModal]);
   const [user, setUser] = useState([]);
   const [loader, setLoader] = useState(false);
   const getMahalla = () => {
@@ -44,7 +45,10 @@ const MahallaPage = () => {
         throw new Error('Response in not JSON');
       })
       .then((data) => setUser(data.data))
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        console.log(error);
+        localStorage.removeItem('token');
+      })
       .finally(() => setLoader(false));
   };
 
@@ -58,6 +62,25 @@ const MahallaPage = () => {
       getMahalla();
     });
   };
+
+  const editMahalla = useCallback(
+    async (id) => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/mahallalar/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token,
+          },
+        });
+        const data = await response.json();
+        setMahallaModal(data?.data);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [setMahallaModal]
+  );
 
   useEffect(() => {
     getMahalla();
@@ -102,7 +125,15 @@ const MahallaPage = () => {
                       </TableCell>
                       <TableCell>{row.nomi}</TableCell>
                       <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Button variant="contained" color="inherit" sx={{ mr: 2 }}>
+                        <Button
+                          variant="contained"
+                          color="inherit"
+                          sx={{ mr: 2 }}
+                          onClick={() => {
+                            editMahalla(row?._id);
+                            setOpen(true);
+                          }}
+                        >
                           Edit
                         </Button>
                         <Button variant="contained" color="error" onClick={() => deleteMahalla(row._id)}>

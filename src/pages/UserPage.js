@@ -59,7 +59,8 @@ export default function UserPage() {
       })
       .catch((error) => {
         console.log(error);
-        // localStorage.removeItem('token');
+        localStorage.removeItem('token');
+        console.log('token expired');
       })
       .finally(() => setLoader(false));
   };

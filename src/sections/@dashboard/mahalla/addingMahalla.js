@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { PropTypes } from 'prop-types';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { token } from '../user/addingUsers';
 import { useMahallaStore } from '../../../store/mahalla';
 
@@ -43,6 +43,31 @@ function AddingMahalla({ onCloses, onOpen, onRequest }) {
       });
     });
   };
+  const updateMahalla = useCallback(
+    async (updatingMahallaData, updatingMahallaId) => {
+      try {
+        await fetch(`http://localhost:5000/api/mahallalar/${updatingMahallaId}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatingMahallaData),
+        }).then(() => {
+          onRequest();
+          onCloses();
+          reset({
+            user: '',
+            nomi: '',
+          });
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [onCloses, onRequest, reset]
+  );
+  console.log(mahallaModal?.nomi, 'mah');
 
   useEffect(() => {
     fetch('https://iiv-backend-fdji.onrender.com/api/users/get-all-user-info', {
@@ -58,33 +83,48 @@ function AddingMahalla({ onCloses, onOpen, onRequest }) {
       });
   }, []);
 
+  useEffect(() => {
+    if (mahallaModal) {
+      reset({
+        nomi: mahallaModal?.nomi,
+      });
+      console.log(mahallaModal);
+    }
+  }, [mahallaModal, reset]);
+
   return (
     <Dialog open={onOpen} onClose={onCloses}>
       <DialogTitle>Mahalla {mahallaModal?._id ? 'Tahrirlash' : "Qo'shish"}</DialogTitle>
       <form
         onSubmit={handleSubmit((data) => {
-          createMahalla(data);
+          if (mahallaModal) {
+            updateMahalla(data, mahallaModal?._id);
+          } else {
+            createMahalla(data);
+          }
         })}
       >
         <DialogContent>
-          <Box style={sameStyle} sx={{ minWidth: 120 }}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Foydalanuvchilar</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                label="Foydalanuvchilar"
-                fullWidth
-                {...register('user', { required: true })}
-              >
-                {usersData?.map((user) => (
-                  <MenuItem key={user._id} value={mahallaModal ? mahallaModal?.user?._id : user._id}>
-                    {user.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+          {!mahallaModal && (
+            <Box style={sameStyle} sx={{ minWidth: 120 }}>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Foydalanuvchilar</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Foydalanuvchilar"
+                  fullWidth
+                  {...register('user', { required: true })}
+                >
+                  {usersData?.map((user) => (
+                    <MenuItem key={user._id} value={mahallaModal ? mahallaModal?.user?._id : user._id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
           <TextField style={sameStyle} placeholder="Mahalla nomi" fullWidth {...register('nomi', { required: true })} />
         </DialogContent>
         <DialogActions>
